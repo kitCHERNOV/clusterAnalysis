@@ -1,29 +1,55 @@
 package main
 
 import (
+	"bufio"
+	"clusterAnalysis/cluster/centroid"
+	tps "clusterAnalysis/lib/types"
 	"encoding/csv"
-	"os"
-	"log"
 	_"fmt"
+	"log"
+	"os"
+	"strconv"
 )
 
-// a point descriotion, that maps to a 2d space
-type Point struct {
-	X int
-	Y int
+func addToPointArray(points []tps.Point, data [][]string) {
+	for i,v := range data {
+		x,_ := strconv.ParseFloat(v[0], 64) // Na+
+		y, _ := strconv.ParseFloat(v[1], 64) // K+
+		points[i] = tps.Point{X: int(x), Y: int(y)}
+	}
+	// fmt.Println(ponts)
 }
 
-// a claster description
-type Claster struct {
-	Centroid Point
-	Points []Point
-} 
+func initPoints(length int) []tps.Point{
+	return make([]tps.Point, length)
+}
 
+func initNClusters() (n int) {
+	sc := bufio.NewScanner(os.Stdin)
+	os.Stdout.WriteString("Enter number of clusters: ") // write w/o buffering
+	sc.Scan()
+	n,_ = strconv.Atoi(sc.Text())
+	return
+}
 
+// First task is a creation of two clusters for training
 func main() {
-	// TODO: input csv file
+	var points []tps.Point
+
+	// after launch test version replace on more relevant
+	restrictionFunc := func(arr [][]string) {
+		const (
+			restrictionStart = 4
+			restrictionEnd = 6
+		)
+
+		for i,_ := range arr{
+			arr[i] = arr[i][restrictionStart:restrictionEnd]
+		}
+	}
+
 	
-	file, err := os.Open("./data/water.csv")
+	file, err := os.Open("./data/testwater.csv")
 	if err != nil {
 		panic(err)
 	}
@@ -36,11 +62,36 @@ func main() {
 	// set split sign
 	reader.Comma = ','
 
-	// read all data
-	data, err := reader.Read()
+	// read headers
+	headers, err := reader.Read()
 	if err != nil {
 	    log.Fatal("Reading error of headers")
 	}
-	_ = data
-	// fmt.Println(data)
+	// TODO: after test launch to del
+	headers = headers[4:6]
+
+	// read all data
+	data, err := reader.ReadAll()
+	if err != nil {
+		log.Fatal("data reading error")
+	}
+	
+	// addToPointArray(data)
+	// fmt.Println("w/o restriction: ", data)
+	restrictionFunc(data)
+	restrictionFunc([][]string{headers})
+	// fmt.Println("restricted data: ",data)
+	// fmt.Println("restricted headers: ", headers)
+
+	//Init points array
+	points = initPoints(len(data))
+
+	addToPointArray(points, data)
+
+	// ========================================== //
+
+	// input number of clusters
+	n := initNClusters()
+	// main scenario start 
+	centroid.CentroidMain(points, n)
 }
