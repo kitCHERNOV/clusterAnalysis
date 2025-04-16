@@ -32,6 +32,7 @@ func MakeClusters(centers []tps.Point, points []tps.Point) []tps.Cluster {
 
 		for j:=0; j<len(centers); j++ {
 			wg.Add(1)
+			// TODO: try catch a possible panic
 			go func(pointIndex, centerIndex int) {
 				defer wg.Done()
 

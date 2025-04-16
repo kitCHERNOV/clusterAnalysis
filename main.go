@@ -94,4 +94,6 @@ func main() {
 	n := initNClusters()
 	// main scenario start 
 	cluster.CentroidMain(points, n)
+
+	// TODO: working with graphics. Just plot points.
 }
