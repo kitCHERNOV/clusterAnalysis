@@ -6,6 +6,11 @@ import (
 	"sync"
 	"math"
 )
+
+// 
+
+
+
 // Recount centroids
 func ToRecountingOfCentroids(clusters []tps.Cluster)  {
 	for i,v := range clusters {
