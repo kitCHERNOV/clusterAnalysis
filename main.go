@@ -2,7 +2,7 @@ package main
 
 import (
 	"bufio"
-	"clusterAnalysis/cluster/centroid"
+	"clusterAnalysis/cluster"
 	tps "clusterAnalysis/lib/types"
 	"encoding/csv"
 	_"fmt"
@@ -15,7 +15,7 @@ func addToPointArray(points []tps.Point, data [][]string) {
 	for i,v := range data {
 		x,_ := strconv.ParseFloat(v[0], 64) // Na+
 		y, _ := strconv.ParseFloat(v[1], 64) // K+
-		points[i] = tps.Point{X: int(x), Y: int(y)}
+		points[i] = tps.Point{X: x, Y: y}
 	}
 	// fmt.Println(ponts)
 }
@@ -93,5 +93,5 @@ func main() {
 	// input number of clusters
 	n := initNClusters()
 	// main scenario start 
-	centroid.CentroidMain(points, n)
+	cluster.CentroidMain(points, n)
 }
