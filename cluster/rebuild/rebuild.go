@@ -2,21 +2,44 @@ package rebuild
 
 import (
 	tps "clusterAnalysis/lib/types"
+	"math"
 	"reflect"
 	"sync"
-	"math"
 )
 
-// 
+// func of calculating WCSS (WithinCluster Sum of Squares)
+func calculateWCSS(clusters []tps.Cluster) float64 {
+	sum := 0.0
+	for _, cluster := range clusters {
+		for _, point := range cluster.Points {
+			t := reflect.TypeOf(point)
+			valPoint := reflect.ValueOf(point)
+			valCenter := reflect.ValueOf(cluster.Centroid)
+			for i := 0; i < t.NumField(); i++ {
+				sum += math.Pow(valCenter.Field(i).Float()-valPoint.Field(i).Float(), 2)
+			}
+		}
+	}
+	return sum
+}
 
+// convergance func
+func ConverganceFunc(oldCluster, newCluster []tps.Cluster, epsilon float64) bool {
 
+	oldWCSS := calculateWCSS(oldCluster)
+	newWCSS := calculateWCSS(newCluster)
+
+	relativeChange := math.Abs((oldWCSS - newWCSS) / oldWCSS)
+
+	return relativeChange >= epsilon
+}
 
 // Recount centroids
-func ToRecountingOfCentroids(clusters []tps.Cluster)  {
-	for i,v := range clusters {
+func ToRecountingOfCentroids(clusters []tps.Cluster) {
+	for i, v := range clusters {
 		sumX := 0.
 		sumY := 0.
-		for j:=0; j<len(v.Points); j++ {
+		for j := 0; j < len(v.Points); j++ {
 			sumX += v.Points[j].X
 			sumY += v.Points[j].Y
 		}
@@ -24,7 +47,7 @@ func ToRecountingOfCentroids(clusters []tps.Cluster)  {
 		if len(v.Points) > 0 {
 			avgX := sumX / float64(len(v.Points))
 			avgY := sumY / float64(len(v.Points))
-	
+
 			clusters[i].Centroid = tps.Point{X: avgX, Y: avgY}
 		}
 	}
@@ -40,13 +63,13 @@ func ToRebuildOfCluster(clusters []tps.Cluster, points []tps.Point) {
 	for i := range clusters {
 		clusters[i].Points = clusters[i].Points[:0]
 	}
-		
-	for i:=0; i<len(points); i++ {
+
+	for i := 0; i < len(points); i++ {
 		distances := make([]float64, len(clusters)) // distances to each centroid
 		t := reflect.TypeOf(points[i])
 		var wg sync.WaitGroup
 
-		for j:=0; j<len(clusters); j++ {
+		for j := 0; j < len(clusters); j++ {
 			wg.Add(1)
 			// TODO: try catch a possible panic
 			go func(pointIndex, centerIndex int) {
@@ -56,19 +79,19 @@ func ToRebuildOfCluster(clusters []tps.Cluster, points []tps.Point) {
 				valPoint := reflect.ValueOf(points[pointIndex])
 				valCenter := reflect.ValueOf(clusters[centerIndex].Centroid)
 
-				for ind:=0; ind < t.NumField(); ind++ {
-					sum += math.Pow(valCenter.Field(ind).Float() - valPoint.Field(ind).Float(), 2)
+				for ind := 0; ind < t.NumField(); ind++ {
+					sum += math.Pow(valCenter.Field(ind).Float()-valPoint.Field(ind).Float(), 2)
 				}
 
 				distances[centerIndex] = math.Sqrt(sum)
 			}(i, j)
 		}
-		wg.Wait()	
-		
+		wg.Wait()
+
 		// find claster for each point
-		minDist := distances[0] // just get as deafault 
+		minDist := distances[0] // just get as deafault
 		minInd := 0
-		for j:=0; j<len(distances); j++ {
+		for j := 0; j < len(distances); j++ {
 			if distances[j] < minDist {
 				minDist = distances[j]
 				minInd = j

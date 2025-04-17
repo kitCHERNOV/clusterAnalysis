@@ -5,22 +5,22 @@ import (
 	"clusterAnalysis/cluster"
 	tps "clusterAnalysis/lib/types"
 	"encoding/csv"
-	_"fmt"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
 )
 
 func addToPointArray(points []tps.Point, data [][]string) {
-	for i,v := range data {
-		x,_ := strconv.ParseFloat(v[0], 64) // Na+
+	for i, v := range data {
+		x, _ := strconv.ParseFloat(v[0], 64) // Na+
 		y, _ := strconv.ParseFloat(v[1], 64) // K+
 		points[i] = tps.Point{X: x, Y: y}
 	}
 	// fmt.Println(ponts)
 }
 
-func initPoints(length int) []tps.Point{
+func initPoints(length int) []tps.Point {
 	return make([]tps.Point, length)
 }
 
@@ -28,7 +28,7 @@ func initNClusters() (n int) {
 	sc := bufio.NewScanner(os.Stdin)
 	os.Stdout.WriteString("Enter number of clusters: ") // write w/o buffering
 	sc.Scan()
-	n,_ = strconv.Atoi(sc.Text())
+	n, _ = strconv.Atoi(sc.Text())
 	return
 }
 
@@ -40,15 +40,14 @@ func main() {
 	restrictionFunc := func(arr [][]string) {
 		const (
 			restrictionStart = 4
-			restrictionEnd = 6
+			restrictionEnd   = 6
 		)
 
-		for i,_ := range arr{
+		for i, _ := range arr {
 			arr[i] = arr[i][restrictionStart:restrictionEnd]
 		}
 	}
 
-	
 	file, err := os.Open("./data/testwater.csv")
 	if err != nil {
 		panic(err)
@@ -65,7 +64,7 @@ func main() {
 	// read headers
 	headers, err := reader.Read()
 	if err != nil {
-	    log.Fatal("Reading error of headers")
+		log.Fatal("Reading error of headers")
 	}
 	// TODO: after test launch to del
 	headers = headers[4:6]
@@ -75,7 +74,7 @@ func main() {
 	if err != nil {
 		log.Fatal("data reading error")
 	}
-	
+
 	// addToPointArray(data)
 	// fmt.Println("w/o restriction: ", data)
 	restrictionFunc(data)
@@ -92,8 +91,9 @@ func main() {
 
 	// input number of clusters
 	n := initNClusters()
-	// main scenario start 
-	cluster.CentroidMain(points, n)
+	// main scenario start
+	clusters := cluster.CentroidMain(points, n)
+	fmt.Println(clusters)
 
 	// TODO: working with graphics. Just plot points.
 }
