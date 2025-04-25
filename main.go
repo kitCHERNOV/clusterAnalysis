@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bufio"
 	"clusterAnalysis/cluster"
+	"clusterAnalysis/lib/config"
 	tps "clusterAnalysis/lib/types"
 	"encoding/csv"
 	"fmt"
@@ -15,7 +15,8 @@ func addToPointArray(points []tps.Point, data [][]string) {
 	for i, v := range data {
 		x, _ := strconv.ParseFloat(v[0], 64) // Na+
 		y, _ := strconv.ParseFloat(v[1], 64) // K+
-		points[i] = tps.Point{X: x, Y: y}
+		z, _ := strconv.ParseFloat(v[2], 64)
+		points[i] = tps.Point{X: x, Y: y, Z: z}
 	}
 	// fmt.Println(ponts)
 }
@@ -24,13 +25,13 @@ func initPoints(length int) []tps.Point {
 	return make([]tps.Point, length)
 }
 
-func initNClusters() (n int) {
-	sc := bufio.NewScanner(os.Stdin)
-	os.Stdout.WriteString("Enter number of clusters: ") // write w/o buffering
-	sc.Scan()
-	n, _ = strconv.Atoi(sc.Text())
-	return
-}
+//func initNClusters() (n int) {
+//	sc := bufio.NewScanner(os.Stdin)
+//	os.Stdout.WriteString("Enter number of clusters: ") // write w/o buffering
+//	sc.Scan()
+//	n, _ = strconv.Atoi(sc.Text())
+//	return
+//}
 
 // First task is a creation of two clusters for training
 func main() {
@@ -40,7 +41,7 @@ func main() {
 	restrictionFunc := func(arr [][]string) {
 		const (
 			restrictionStart = 4
-			restrictionEnd   = 6
+			restrictionEnd   = 7
 		)
 
 		for i, _ := range arr {
@@ -48,7 +49,7 @@ func main() {
 		}
 	}
 
-	file, err := os.Open("./data/testwater.csv")
+	file, err := os.Open("./data/water.csv")
 	if err != nil {
 		panic(err)
 	}
@@ -67,7 +68,7 @@ func main() {
 		log.Fatal("Reading error of headers")
 	}
 	// TODO: after test launch to del
-	headers = headers[4:6]
+	headers = headers[4:7]
 
 	// read all data
 	data, err := reader.ReadAll()
@@ -80,7 +81,7 @@ func main() {
 	restrictionFunc(data)
 	restrictionFunc([][]string{headers})
 	// fmt.Println("restricted data: ",data)
-	// fmt.Println("restricted headers: ", headers)
+	fmt.Println("restricted headers: ", headers)
 
 	//Init points array
 	points = initPoints(len(data))
@@ -90,7 +91,8 @@ func main() {
 	// ========================================== //
 
 	// input number of clusters
-	n := initNClusters()
+	cfg := config.LoadConfig()
+	n := cfg.ClusterCount
 	// main scenario start
 	clusters := cluster.CentroidMain(points, n)
 	fmt.Println(clusters)
