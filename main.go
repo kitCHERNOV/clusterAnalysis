@@ -3,6 +3,7 @@ package main
 import (
 	"clusterAnalysis/cluster"
 	"clusterAnalysis/lib/config"
+	"clusterAnalysis/lib/graphics"
 	tps "clusterAnalysis/lib/types"
 	"encoding/csv"
 	"fmt"
@@ -15,8 +16,8 @@ func addToPointArray(points []tps.Point, data [][]string) {
 	for i, v := range data {
 		x, _ := strconv.ParseFloat(v[0], 64) // Na+
 		y, _ := strconv.ParseFloat(v[1], 64) // K+
-		z, _ := strconv.ParseFloat(v[2], 64)
-		points[i] = tps.Point{X: x, Y: y, Z: z}
+		//z, _ := strconv.ParseFloat(v[2], 64)
+		points[i] = tps.Point{X: x, Y: y} //, Z: z}
 	}
 	// fmt.Println(ponts)
 }
@@ -41,7 +42,7 @@ func main() {
 	restrictionFunc := func(arr [][]string) {
 		const (
 			restrictionStart = 4
-			restrictionEnd   = 7
+			restrictionEnd   = 6
 		)
 
 		for i, _ := range arr {
@@ -95,7 +96,8 @@ func main() {
 	n := cfg.ClusterCount
 	// main scenario start
 	clusters := cluster.CentroidMain(points, n)
-	fmt.Println(clusters)
+	//fmt.Println(clusters)
 
 	// TODO: working with graphics. Just plot points.
+	graphics.DrawPoints(clusters)
 }

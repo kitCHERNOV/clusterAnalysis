@@ -4,7 +4,6 @@ import (
 	ctr "clusterAnalysis/cluster/centroid"
 	"clusterAnalysis/cluster/rebuild"
 	tps "clusterAnalysis/lib/types"
-	"fmt"
 )
 
 const (
@@ -20,7 +19,7 @@ func CentroidMain(data []tps.Point, n int) []tps.Cluster {
 
 	// to generate centroids based on centers arr
 	var clusters = ctr.MakeClusters(centers, data) // sign var to recognize var in code
-	fmt.Println(clusters)
+	//fmt.Println(clusters)
 
 	// After run a interations that cover a cluster rebuilding
 	var rightOfContinuation = true
